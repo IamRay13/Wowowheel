@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+ <html lang="en">
+ <head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>Wheel of Fortune</title>
+     <style>
+         body {
+             display: flex;
+             flex-direction: column;
+             align-items: center;
+             justify-content: center;
+             height: 100vh;
+             font-family: Arial, sans-serif;
+             background-color: #e0f7fa;
+             position: relative;
+         }
+         #wheelCanvas {
+             border: 2px solid #009688;
+             border-radius: 50%;
+             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+         }
+         button {
+             margin-top: 20px;
+             padding: 10px 20px;
+             font-size: 20px;
+             color: white;
+             background-color: #009688;
+             border: none;
+             border-radius: 5px;
+             cursor: pointer;
+             transition: background-color 0.3s;
+         }
+         button:hover {
+             background-color: #0056b3;
+         }
+         #winnerMessage {
+             margin-top: 20px;
+             font-size: 24px;
+             color: #009688;
+         }
+         #arrow {
+             position: absolute;
+             top: 90px; /* Adjust this value to place the arrow right below the h1 */
+             left: 50%;
+             transform: translateX(-50%);
+             font-size: 30px;
+             color: #ff0000;
+         }
+     </style>
+ </head>
+ <body>
+     <h1>WOWOWHEEL</h1>
+     <div id="arrow">⬇️</div>
+     <canvas id="wheelCanvas" width="500" height="500"></canvas>
+     <button id="spinButton">Spin</button>
+     <div id="winnerMessageXXX"></div>
+    <script>
+         const names = [
+             "Miricar Ross Amasa Abregana",
+             "Jade Judilla Tan",
+             "Gladys Owatan Miñoza",
+             "Ramon Mangubat Tariao",
+             "Harben De Castro",
+             "Mariejo Rondero Anglit Indoy",
+             "Stefano Luis Ibaseta Arriola",
+             "Floravee Rama Tampos",
+             "Kimberly Tajado Silagpo",
+             "Huervo Sanchez Baculi",
+             "Jovelyn Escora Capuno",
+             "Hanefah Mamarinta Ameril",
+             "Liberty Balagtas Fajardo",
+             "Windy Lapon Aniñon",
+             "Jean Ivey Oyao",
+             "Shannen Claire Capuyan Tumulak",
+             "Tim Joverl Espinosa Bahena",
+             "Reyk Javik Jr. Talisay Mendoza",
+             "Ranzel Dulotan Padayao",
+             "Rizza Mae Sampaga Mabuan",
+             "Danica Tampipi Sayson",
+             "Loreto Jr. Omas Iwayan",
+             "Ailene Maribojoc Tequillo",
+             "Juliana Faye Gutierrez Catamco"
+         ];
+        const colors = [
+             "#FF5733", "#FF8D1A", "#FFC300", "#FFD700", "#FF1493", "#FF6347",
+             "#32CD32", "#20B2AA", "#4169E1", "#6A5ACD", "#8A2BE2", "#4B0082"
+         ];
+        const wheelCanvas = document.getElementById("wheelCanvas");
+         const ctx = wheelCanvas.getContext("2d");
+         const spinButton = document.getElementById("spinButton");
+         const winnerMessage = document.getElementById("winnerMessage");
+        let startAngle = 0;
+         const arc = Math.PI / (names.length / 2);
+         let spinTimeout = null;
+        function drawWheel() {
+             ctx.clearRect(0, 0, 500, 500);
+             for (let i = 0; i < names.length; i++) {
+                 const angle = startAngle + i * arc;
+                 ctx.fillStyle = colors[i % colors.length];
+                 ctx.beginPath();
+                 ctx.moveTo(250, 250);
+                 ctx.arc(250, 250, 250, angle, angle + arc, false);
+                 ctx.closePath();
+                 ctx.fill();
+                ctx.save();
+                 ctx.translate(250 + Math.cos(angle + arc / 2) * 125, 250 + Math.sin(angle + arc / 2) * 125);
+                 ctx.rotate(angle + arc / 2);
+                 ctx.fillStyle = "white";
+                 ctx.font = "bold 14px Arial";
+                 ctx.fillText(names[i], -ctx.measureText(names[i]).width / 2, 0);
+                 ctx.restore();
+             }
+         }
+        function rotateWheel() {
+             const spinTimeTotal = Math.random() * 4000 + 10000; // Random spin time between 10 and 14 seconds
+             const spinAngleStart = Math.random() * 10 + 10;
+             const spinAngle = spinAngleStart;
+            const spinStartTime = Date.now();
+            function easeOut(t, b, c, d) {
+                 t /= d;
+                 t--;
+                 return c * (t * t * t + 1) + b;
+             }
+            function animateSpin() {
+                 const spinTime = Date.now() - spinStartTime;
+                 if (spinTime < spinTimeTotal) {
+                     const spinAngle = easeOut(spinTime, 0, spinAngleStart, spinTimeTotal);
+                     startAngle += spinAngle * Math.PI / 180;
+                     drawWheel();
+                     spinTimeout = requestAnimationFrame(animateSpin);
+                 } else {
+                     const finalAngle = startAngle % (2 * Math.PI);
+                     const winnerIndex = Math.floor((2 * Math.PI - finalAngle) / arc) % names.length;
+                     drawWheel();
+                     winnerMessage.innerText = "Congratulations, " + names[winnerIndex] + "!";
+                 }
+             }
+             animateSpin();
+         }
+        drawWheel();
+         spinButton.addEventListener("click", () => {
+             if (spinTimeout) {
+                 cancelAnimationFrame(spinTimeout);
+                 spinTimeout = null;
+             }
+             rotateWheel();
+         });
+     </script>
+ </body>
+ </html>
+  
